@@ -1,0 +1,33 @@
+# project data
+data
+saved_models
+threshold_map
+models_info
+custom_norm
+learned_zones
+corr_indices
+metric_curves
+results
+
+# simulate_models.csv
+
+dataset
+
+.python-version
+__pycache__
+
+# by default avoid model files and png files
+*.png
+!saved_models/*.png
+.vscode
+
+# simulate models .csv file
+simulate_models*.csv
+
+# log file if used
+logs
+backups
+*.log
+
+oar.sh
+params.txt
