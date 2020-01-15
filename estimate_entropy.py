@@ -43,12 +43,18 @@ def write_progress(progress):
 '''
 Compute for list of images entropy list of these images
 '''
-def get_zone_entropy(images):
+def get_zone_entropy(images, interval):
     
     entropy_list = []
     
+    begin, end = interval
+
     for img in images:
-        s_entropy = utils.get_entropy(transform.get_LAB_L_SVD_s(img))
+        sigma = transform.get_LAB_L_SVD_s(img)
+        sigma = sigma[begin:end]
+
+        print(len(sigma))
+        s_entropy = utils.get_entropy(sigma)
         entropy_list.append(s_entropy)
         
     return entropy_list
@@ -59,10 +65,12 @@ def main():
     parser = argparse.ArgumentParser(description="Output data file")
 
     parser.add_argument('--output', type=str, help='save entropy for each zone of each scene into file')
+    parser.add_argument('--interval', type=str, help='svd interval to use', default="0,200")
 
     args = parser.parse_args()
 
-    p_output = args.output
+    p_output   = args.output
+    p_interval = tuple(map(int, args.interval.split(',')))
 
     # create output path if not exists
     p_output_path = os.path.join(cfg.output_data_folder, p_output)
@@ -124,7 +132,7 @@ def main():
         for img_path in images_path[scene]:
 
             blocks = segmentation.divide_in_blocks(Image.open(img_path), (200, 200))
-            entropy_list = get_zone_entropy(blocks)
+            entropy_list = get_zone_entropy(blocks, p_interval)
 
             for index, entropy in enumerate(entropy_list):
                 blocks_entropy[index].append(entropy)

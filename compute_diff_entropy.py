@@ -42,11 +42,13 @@ def main():
     parser = argparse.ArgumentParser(description="Read and compute entropy data file")
 
     parser.add_argument('--data', type=str, help='entropy file data to read and compute')
+    parser.add_argument('--norm', type=int, help='normalize or not entropy', choices=[0, 1], default=0)
     parser.add_argument('--output', type=str, help='prediction file used')
 
     args = parser.parse_args()
 
     p_data   = args.data
+    p_norm   = args.norm
     p_output = args.output
 
     # create output path if not exists
@@ -78,7 +80,12 @@ def main():
                     found_index = index
                     break
             
-            diff_entropy_found.append(entropy_diff_list[found_index])
+            if p_norm:
+                diff_entropy_kept = utils.normalize_arr(entropy_diff_list[:found_index+1])[-1]
+            else:
+                diff_entropy_kept = entropy_diff_list[found_index]
+            
+            diff_entropy_found.append(diff_entropy_kept)
 
         mean_entropy_diff = sum(diff_entropy_found) / len(diff_entropy_found)
         print(mean_entropy_diff)
@@ -104,7 +111,13 @@ def main():
             # by default max index (if no stoppring criteria found)
             found_index = len(image_indices_without_first) - 1
             for index, v in enumerate(entropy_diff_list):
-                if mean_entropy_diff > v:
+
+                if p_norm:
+                    current_v = utils.normalize_arr(entropy_diff_list[:index+1])[-1]
+                else:
+                    current_v = v
+
+                if mean_entropy_diff > current_v:
                     found_index = index
                     break
 
@@ -117,6 +130,7 @@ def main():
                 f.write(threshold + ';')
                 f.write(threshold_found + ';')
                 f.write(str(mean_entropy_diff) + ';')
+                f.write(str(p_norm))
                 f.write('\n')
 
 
