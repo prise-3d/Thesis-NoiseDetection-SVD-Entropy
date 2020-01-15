@@ -1,4 +1,4 @@
-# Noise detection using 26 attributes
+# Noise detection using SVD entropy
 
 ## Description
 
