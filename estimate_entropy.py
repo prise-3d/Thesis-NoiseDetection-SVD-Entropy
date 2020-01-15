@@ -53,7 +53,6 @@ def get_zone_entropy(images, interval):
         sigma = transform.get_LAB_L_SVD_s(img)
         sigma = sigma[begin:end]
 
-        print(len(sigma))
         s_entropy = utils.get_entropy(sigma)
         entropy_list.append(s_entropy)
         

@@ -1,4 +1,4 @@
-IPFML
+ipfml
 sklearn
 scikit-image
 tensorflow
