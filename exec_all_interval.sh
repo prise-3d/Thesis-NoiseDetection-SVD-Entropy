@@ -34,7 +34,7 @@ for start in {0,50,100,150}; do
 
                 reference_image="references/${scene}_${scenes_ref_index[$scene]}.png"
                 
-                python reconstruct_image_estimated.py --data data/${diff_file} --scene ${scene} --output data/images/${scene}_${start}_${end}_estimated.png
+                python reconstruct_image_estimated.py --data data/entropy_diff_norm0_${start}_${end}.csv --scene ${scene} --output data/images/${scene}_${start}_${end}_estimated.png
 
                 estimated_error=$(python compare_images.py --img1 ${reference_image} --img2 data/images/${scene}_${start}_${end}_estimated.png --metric ${metric})
                 human_error=$(python compare_images.py --img1 ${reference_image} --img2 data/images/${scene}_human.png --metric ${metric})
