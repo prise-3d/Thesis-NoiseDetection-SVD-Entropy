@@ -28,11 +28,11 @@ def get_zone_diff_entropy(entropy_list):
     for index, value in enumerate(entropy_list):
         
         if index == 0:
-            previous_value = value
+            previous_value = float(value)
         else:
-            diff = previous_value - value
+            diff = previous_value - float(value)
             diff_list.append(diff)
-            previous_value = value
+            previous_value = float(value)
         
     return diff_list
 
@@ -73,7 +73,8 @@ def main():
 
             found_index = 0
             for index, v in enumerate(image_indices_without_first):
-                if threshold > v:
+                
+                if int(v) > int(threshold):
                     found_index = index
                     break
             
@@ -82,6 +83,9 @@ def main():
         mean_entropy_diff = sum(diff_entropy_found) / len(diff_entropy_found)
         print(mean_entropy_diff)
             
+        with open(p_output_path, 'w') as f:
+            print("Erase", p_output_path, "previous file if exists")
+
         # now we can predict threshold img using `mean_entropy_diff`
         for line in lines:
             data = line.split(';')
@@ -112,7 +116,7 @@ def main():
                 f.write(zone_index_str + ';')
                 f.write(threshold + ';')
                 f.write(threshold_found + ';')
-                f.write(mean_entropy_diff + ';')
+                f.write(str(mean_entropy_diff) + ';')
                 f.write('\n')
 
 

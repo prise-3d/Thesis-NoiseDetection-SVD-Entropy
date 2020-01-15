@@ -101,9 +101,13 @@ def main():
                 threshold_list.append(int(f.readline()))
 
         thresholds[scene] = threshold_list
-        images_path[scene] = sorted([os.path.join(scene_path, img) for img in os.listdir(scene_path) if '.png' in img])
+        images_path[scene] = sorted([os.path.join(scene_path, img) for img in os.listdir(scene_path) if cfg.scene_image_extension in img])
         number_of_images = number_of_images + len(images_path[scene])
 
+
+
+    with open(p_output_path, 'w') as f:
+        print("Erase", p_output_path, "previous file if exists")
 
     image_counter = 0
     # compute entropy for each zones of each scene images

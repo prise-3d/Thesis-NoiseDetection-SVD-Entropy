@@ -23,12 +23,18 @@ def main():
     parser = argparse.ArgumentParser(description="Read and compute entropy data file")
 
     parser.add_argument('--data', type=str, help='entropy file data with estimated threshold to read and compute')
-    parser.add_argument('--scene', type=str, help='scene expected to display', choices=scenes_list)
+    parser.add_argument('--scene', type=str, help='Scene index to use', choices=cfg.scenes_indices)
 
     args = parser.parse_args()
 
     p_data   = args.data
     p_scene  = args.scene
+
+    scenes_list = cfg.scenes_names
+    scenes_indices = cfg.scenes_indices
+
+    scene_index = scenes_indices.index(p_scene.strip())
+    scene = scenes_list[scene_index]
 
     # read line by line file to estimate threshold entropy stopping criteria
     with open(p_data, 'r') as f:
@@ -39,11 +45,11 @@ def main():
             data = line.split(';')
             scene_name = data[0]
 
-            if scene_name == p_scene:
+            if scene_name == scene:
                 zone_index = data[1]
                 zone_index_str = data[2]
                 threshold = data[3]
-                threshold_found = data[3]
+                threshold_found = data[4]
 
                 # TODO : print plot using these data
                 print(zone_index_str, '(true, estimated)', threshold, ' <=>', threshold_found)

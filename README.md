@@ -4,10 +4,18 @@
 
 Noise detection on synthesis images using SVD entropy criteria.
 
-Entropy gives information about complexity of an image.
+Assumption: Entropy gives information about complexity of an image.
 
 ## Requirements
 
+Recursive clone is required for `modules` git project.
+
+or
+```
+git submodule update --init --recursive
+```
+
+Then, install python dependencies:
 ```
 pip install -r requirements.txt
 ```
@@ -46,15 +54,33 @@ ln -s /path/to/your/data dataset
 
 ### Generated data directories:
 
-- **data/\***: folder which will contain all generated *.train* & *.test* files in order to train model.
-- **saved_models/\***: all scikit learn or keras models saved.
-- **models_info/\***: all markdown files generated to get quick information about model performance and prediction obtained after running `run/runAll_*.sh` script.
-- **results/**:  This folder contains `model_comparisons.csv` file used for store models performance.
+- **data/\***: folder which will contain all generated data files.
 
 
 ## How to use ?
 
-Explained later...
+
+**Note:** All generated output files are saved into `data` folder by default.
+
+
+You can generate your own entropy data extracted from your dataset:
+```bash
+python estimate_entropy.py --output entropy_data.csv
+```
+
+You can compute the diff entropy using previous data file and get all estimated threshold from gradient criteria (obtained from human threshold):
+```
+python compute_diff_entropy.py --data data/entropy_data.py --output entropy_diff.csv
+```
+
+Then you can reconstruct image using estimated thresholds:
+```
+python reconstruct_image_estimated --data data/entropy_diff.csv --scene A --output data/images/A_scene_estimated.png
+```
+
+## TODO
+
+- Create bash script to run all scenes
 
 ## License
 
