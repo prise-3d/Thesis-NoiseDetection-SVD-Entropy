@@ -85,7 +85,8 @@ def main():
             else:
                 diff_entropy_kept = entropy_diff_list[found_index]
             
-            diff_entropy_found.append(diff_entropy_kept)
+            # Keep only absolute value
+            diff_entropy_found.append(abs(diff_entropy_kept))
 
         mean_entropy_diff = sum(diff_entropy_found) / len(diff_entropy_found)
         print(mean_entropy_diff)
@@ -117,7 +118,7 @@ def main():
                 else:
                     current_v = v
 
-                if mean_entropy_diff > current_v:
+                if mean_entropy_diff > abs(current_v):
                     found_index = index
                     break
 

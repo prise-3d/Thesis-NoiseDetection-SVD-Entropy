@@ -4,7 +4,7 @@ declare -A scenes_ref_index=( ["A"]="00900" ["B"]="10000" ["C"]="01480" ["D"]="0
 diff_file="entropy_diff_norm0.csv"
 metric="rmse"
 
-#python compute_diff_entropy.py --data data/entropy_data.csv --output ${diff_file}
+python compute_diff_entropy.py --data data/entropy_data.csv --output ${diff_file}
 
 for scene in {"A","B","C","D","E","F","G","H","I"}; do
 
