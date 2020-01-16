@@ -6,7 +6,7 @@ import sys, os, argparse
 # image processing
 from PIL import Image
 from ipfml import utils
-from ipfml.processing import transform, segmentation
+from ipfml.processing import transform, segmentation, compression
 
 # modules and config imports
 sys.path.insert(0, '') # trick to enable import of main folder module
@@ -43,14 +43,19 @@ def write_progress(progress):
 '''
 Compute for list of images entropy list of these images
 '''
-def get_zone_entropy(images, interval):
+def get_zone_entropy(images, interval, imnorm=False):
     
     entropy_list = []
     
     begin, end = interval
 
     for img in images:
-        sigma = transform.get_LAB_L_SVD_s(img)
+        img_lab = transform.get_LAB_L(img)
+        
+        if imnorm:
+            img_lab = np.array(img_lab / 255.)
+
+        sigma = compression.get_SVD_s(img_lab)
         sigma = sigma[begin:end]
 
         s_entropy = utils.get_entropy(sigma)
@@ -65,11 +70,13 @@ def main():
 
     parser.add_argument('--output', type=str, help='save entropy for each zone of each scene into file')
     parser.add_argument('--interval', type=str, help='svd interval to use', default="0,200")
+    parser.add_argument('--imnorm', type=int, help="specify if image is normalized before computing something", default=0, choices=[0, 1])
 
     args = parser.parse_args()
 
     p_output   = args.output
     p_interval = tuple(map(int, args.interval.split(',')))
+    p_imnorm   = args.imnorm
 
     # create output path if not exists
     p_output_path = os.path.join(cfg.output_data_folder, p_output)
@@ -131,7 +138,7 @@ def main():
         for img_path in images_path[scene]:
 
             blocks = segmentation.divide_in_blocks(Image.open(img_path), (200, 200))
-            entropy_list = get_zone_entropy(blocks, p_interval)
+            entropy_list = get_zone_entropy(blocks, p_interval, p_imnorm)
 
             for index, entropy in enumerate(entropy_list):
                 blocks_entropy[index].append(entropy)

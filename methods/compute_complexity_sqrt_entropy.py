@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import sys, os, argparse
+import math
 
 # image processing
 from PIL import Image
@@ -30,10 +31,10 @@ def get_sobel_entropy_complexity(entropy_list, sobel_list):
         
         if index > 0:
             
-            entropy_diff = abs(previous_entropy_value - float(value))
-            sobel_diff = abs(previous_sobel_value - float(value))
+            entropy_diff = math.pow(previous_entropy_value - float(value), 2)
+            sobel_diff = math.pow(previous_sobel_value - float(value), 2)
             
-            dh = entropy_diff * sobel_diff
+            dh = entropy_diff / sobel_diff
             dh_list.append(dh)
         
         previous_entropy_value = float(value)

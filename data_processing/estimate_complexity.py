@@ -34,12 +34,18 @@ def get_sobel_filtered_img(lab_img, k_size=3):
 '''
 Compute for list of images complexity list of these images
 '''
-def get_zone_sobel_complexity(images, ksize):
+def get_zone_sobel_complexity(images, ksize, imnorm=False):
     
     sobel_complexity_list = []
     
     for img in images:
-        sobel_complexity = np.std(get_sobel_filtered_img(transform.get_LAB_L(img), ksize))
+
+        sobel_img = get_sobel_filtered_img(transform.get_LAB_L(img), ksize)
+
+        if imnorm:
+            sobel_img = np.array(sobel_img / 255.)
+
+        sobel_complexity = np.std(sobel_img)
         sobel_complexity_list.append(sobel_complexity)
         
     return sobel_complexity_list
@@ -72,17 +78,18 @@ def main():
 
     parser.add_argument('--output', type=str, help='save complexity for each zone of each scene into file')
     parser.add_argument('--ksize', type=int, help='sobel kernel size', default=3)
+    parser.add_argument('--imnorm', type=int, help="specify if image is normalized before computing something", default=0, choices=[0, 1])
 
     args = parser.parse_args()
 
     p_output   = args.output
     p_ksize    = args.ksize
+    p_imnorm   = args.imnorm
 
     # create output path if not exists
     p_output_path = os.path.join(cfg.output_data_folder, p_output)
     if not os.path.exists(cfg.output_data_folder):
         os.makedirs(cfg.output_data_folder)
-
     
     zones_list = []
 
@@ -138,7 +145,7 @@ def main():
         for img_path in images_path[scene]:
 
             blocks = segmentation.divide_in_blocks(Image.open(img_path), (200, 200))
-            complexity_list = get_zone_sobel_complexity(blocks, p_ksize)
+            complexity_list = get_zone_sobel_complexity(blocks, p_ksize, p_imnorm)
 
             for index, complexity in enumerate(complexity_list):
                 blocks_complexity[index].append(complexity)
