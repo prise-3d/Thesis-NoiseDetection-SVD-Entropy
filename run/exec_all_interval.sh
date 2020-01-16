@@ -21,7 +21,6 @@ declare -A scenes_ref_index=( ["A"]="00900" ["B"]="10000" ["C"]="01480" ["D"]="0
 
 metric="rmse"
 output_directory="results"
-norm=0
 
 if [ ! -d "$output_directory" ]; then
     # Control will enter here if $DIRECTORY doesn't exist.
