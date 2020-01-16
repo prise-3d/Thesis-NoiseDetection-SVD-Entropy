@@ -1,4 +1,4 @@
-list="complexity, complexity_sqrt"
+list="complexity, complexity_pow, complexity_diff"
 
 if [ -z "$1" ]
   then
@@ -7,7 +7,7 @@ if [ -z "$1" ]
     exit 1
 fi
 
-if [[ "$1" =~ ^(complexity|complexity_sqrt)$ ]]; then
+if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff)$ ]]; then
     method=$1
     echo "Start computing each scene result using '${method}' approach from entropy and sobel complexity..."
     echo "-------------------------------------------------------------------------------------------"

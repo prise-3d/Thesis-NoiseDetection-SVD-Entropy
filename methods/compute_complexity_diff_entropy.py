@@ -27,18 +27,18 @@ def get_sobel_entropy_complexity(entropy_list, sobel_list):
     previous_entropy_value = 0
     previous_sobel_value = 0
     
-    for index, value in enumerate(entropy_list):
+    for i in range(len(entropy_list)):
         
-        if index > 0:
+        if i > 0:
             
-            entropy_diff = math.pow(previous_entropy_value - float(value), 2)
-            sobel_diff = math.pow(previous_sobel_value - float(value), 2)
+            entropy_diff = 1 - abs(previous_entropy_value - float(entropy_list[i]))
+            sobel_diff = 1 - abs(previous_sobel_value - float(sobel_list[i]))
             
-            dh = entropy_diff / sobel_diff
+            dh = entropy_diff * sobel_diff
             dh_list.append(dh)
         
-        previous_entropy_value = float(value)
-        previous_sobel_value = float(sobel_list[index])
+        previous_entropy_value = float(entropy_list[i])
+        previous_sobel_value = float(sobel_list[i])
         
     return dh_list
 
