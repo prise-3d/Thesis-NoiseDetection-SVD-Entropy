@@ -65,22 +65,18 @@ ln -s /path/to/your/data dataset
 
 You can generate your own entropy data extracted from your dataset:
 ```bash
-python estimate_entropy.py --output entropy_data.csv
+python data_processing/estimate_entropy.py --output entropy_data.csv
 ```
 
 You can compute the diff entropy using previous data file and get all estimated threshold from gradient criteria (obtained from human threshold):
 ```
-python compute_diff_entropy.py --data data/entropy_data.py --output entropy_diff.csv
+python methods/compute_diff_entropy.py --data data/entropy_data.py --output entropy_diff.csv
 ```
 
 Then you can reconstruct image using estimated thresholds:
 ```
-python reconstruct_image_estimated --data data/entropy_diff.csv --scene A --output data/images/A_scene_estimated.png
+python utils/reconstruct_image_estimated --data data/entropy_diff.csv --scene A --output data/images/A_scene_estimated.png
 ```
-
-## TODO
-
-- Create bash script to run all scenes
 
 ## License
 

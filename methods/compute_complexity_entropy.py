@@ -18,30 +18,36 @@ scenes_list    = cfg.scenes_names
 zones_indices  = cfg.zones_indices
 
 '''
-Compute diff from entropy list (first element is used as reference)
+Compute gradient from entropy and complexity lists (first element is used as reference)
 '''
-def get_zone_diff_entropy(entropy_list):
+def get_sobel_entropy_complexity(entropy_list, sobel_list):
     
-    diff_list = []
-    previous_value = 0
+    dh_list = []
+    previous_entropy_value = 0
+    previous_sobel_value = 0
     
     for index, value in enumerate(entropy_list):
         
-        if index == 0:
-            previous_value = float(value)
-        else:
-            diff = previous_value - float(value)
-            diff_list.append(diff)
-            previous_value = float(value)
+        if index > 0:
+            
+            entropy_diff = abs(previous_entropy_value - float(value))
+            sobel_diff = abs(previous_sobel_value - float(value))
+            
+            dh = entropy_diff * sobel_diff
+            dh_list.append(dh)
         
-    return diff_list
+        previous_entropy_value = float(value)
+        previous_sobel_value = float(sobel_list[index])
+        
+    return dh_list
 
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Read and compute entropy data file")
+    parser = argparse.ArgumentParser(description="Read and compute entropy data file (using gradient)")
 
-    parser.add_argument('--data', type=str, help='entropy file data to read and compute')
+    parser.add_argument('--data1', type=str, help='entropy file data to read and compute')
+    parser.add_argument('--data2', type=str, help='entropy file data to read and compute')
     parser.add_argument('--norm', type=int, help='normalize or not entropy', choices=[0, 1], default=0)
     parser.add_argument('--output', type=str, help='prediction file used')
 
@@ -60,7 +66,7 @@ def main():
     with open(p_data, 'r') as f:
         lines = f.readlines()
 
-        diff_entropy_found = []
+        gradient_entropy_found = []
         for line in lines:
 
             data = line.split(';')
@@ -69,8 +75,9 @@ def main():
             image_indices = data[4].split(',')
             entropy_list = data[5].split(',')
 
-            # one element is removed using this function (first element of list for computing first difference)
-            entropy_diff_list = get_zone_diff_entropy(entropy_list)
+            # one element is removed using this function (first element of list for computing first gradienterence)
+            # TODO : update this part
+            entropy_gradient_list = get_sobel_entropy_complexity(entropy_list)
             image_indices_without_first = image_indices[1:]
 
             found_index = 0
@@ -81,20 +88,20 @@ def main():
                     break
             
             if p_norm:
-                diff_entropy_kept = utils.normalize_arr(entropy_diff_list[:found_index+1])[-1]
+                gradient_entropy_kept = utils.normalize_arr(entropy_gradient_list[:found_index+1])[-1]
             else:
-                diff_entropy_kept = entropy_diff_list[found_index]
+                gradient_entropy_kept = entropy_gradient_list[found_index]
             
             # Keep only absolute value
-            diff_entropy_found.append(diff_entropy_kept)
+            gradient_entropy_found.append(gradient_entropy_kept)
 
-        mean_entropy_diff = sum(diff_entropy_found) / len(diff_entropy_found)
-        print(mean_entropy_diff)
+        mean_entropy_gradient = sum(gradient_entropy_found) / len(gradient_entropy_found)
+        print(mean_entropy_gradient)
             
         with open(p_output_path, 'w') as f:
             print("Erase", p_output_path, "previous file if exists")
 
-        # now we can predict threshold img using `mean_entropy_diff`
+        # now we can predict threshold img using `mean_entropy_gradient`
         for line in lines:
             data = line.split(';')
 
@@ -105,20 +112,21 @@ def main():
             image_indices = data[4].split(',')
             entropy_list = data[5].split(',')
 
-            # one element is removed using this function (first element of list for computing first difference)
-            entropy_diff_list = get_zone_diff_entropy(entropy_list)
+            # one element is removed using this function (first element of list for computing first gradienterence)
+            # TODO : update this part
+            entropy_gradient_list = get_sobel_entropy_complexity(entropy_list)
             image_indices_without_first = image_indices[1:]
 
             # by default max index (if no stoppring criteria found)
             found_index = len(image_indices_without_first) - 1
-            for index, v in enumerate(entropy_diff_list):
+            for index, v in enumerate(entropy_gradient_list):
 
                 if p_norm:
-                    current_v = utils.normalize_arr(entropy_diff_list[:index+1])[-1]
+                    current_v = utils.normalize_arr(entropy_gradient_list[:index+1])[-1]
                 else:
                     current_v = v
 
-                if mean_entropy_diff > current_v:
+                if mean_entropy_gradient > current_v:
                     found_index = index
                     break
 
@@ -130,7 +138,7 @@ def main():
                 f.write(zone_index_str + ';')
                 f.write(threshold + ';')
                 f.write(threshold_found + ';')
-                f.write(str(mean_entropy_diff) + ';')
+                f.write(str(mean_entropy_gradient) + ';')
                 f.write(str(p_norm))
                 f.write('\n')
 
