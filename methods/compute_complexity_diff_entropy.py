@@ -21,35 +21,49 @@ zones_indices  = cfg.zones_indices
 '''
 Compute gradient from entropy and complexity lists (first element is used as reference)
 '''
-def get_sobel_entropy_complexity(entropy_list, sobel_list):
+def get_sobel_entropy_complexity(entropy_list, sobel_list, std=False):
     
     dh_list = []
     previous_entropy_value = 0
     previous_sobel_value = 0
     
+
+    entropy_list = list(map(float, entropy_list))
+    sobel_list = list(map(float, sobel_list))
+
+    if std:
+        entropy_list_norm = utils.normalize_arr(entropy_list)
+        sobel_list_norm = utils.normalize_arr(sobel_list)
+    
     for i in range(len(entropy_list)):
         
         if i > 0:
             
-            entropy_diff = 1 - abs(previous_entropy_value - float(entropy_list[i]))
-            sobel_diff = 1 - abs(previous_sobel_value - float(sobel_list[i]))
+            entropy_diff = 1 - abs(previous_entropy_value - entropy_list[i])
+            sobel_diff = 1 - abs(previous_sobel_value - sobel_list[i])
             
-            dh = entropy_diff * sobel_diff
+            if std:
+                # ponderation using `std` from each list
+                dh = (entropy_diff * np.std(entropy_list_norm[:(i+1)])) * (sobel_diff * np.std(sobel_list_norm[:(i+1)]))
+            else:
+                dh = entropy_diff * sobel_diff
+
             dh_list.append(dh)
         
-        previous_entropy_value = float(entropy_list[i])
-        previous_sobel_value = float(sobel_list[i])
+        previous_entropy_value = entropy_list[i]
+        previous_sobel_value = sobel_list[i]
         
     return dh_list
 
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Read and compute entropy data file (using gradient)")
+    parser = argparse.ArgumentParser(description="Read and compute complexity data file (using entropy and sobel diff)")
 
     parser.add_argument('--data1', type=str, help='entropy file data to read and compute')
     parser.add_argument('--data2', type=str, help='entropy file data to read and compute')
     parser.add_argument('--norm', type=int, help='normalize or not entropy', choices=[0, 1], default=0)
+    parser.add_argument('--std', type=int, help='multiply result by current std', choices=[0, 1], default=0)
     parser.add_argument('--output', type=str, help='prediction file used')
 
     args = parser.parse_args()
@@ -57,6 +71,7 @@ def main():
     p_data1  = args.data1
     p_data2  = args.data2
     p_norm   = args.norm
+    p_std    = args.std
     p_output = args.output
 
     # create output path if not exists
@@ -87,7 +102,7 @@ def main():
 
 
         # one element is removed using this function (first element of list for computing first gradient complexity)
-        entropy_gradient_list = get_sobel_entropy_complexity(entropy_list, complexity_list)
+        entropy_gradient_list = get_sobel_entropy_complexity(entropy_list, complexity_list, p_std)
         image_indices_without_first = image_indices[1:]
 
         found_index = 0
@@ -106,7 +121,10 @@ def main():
         gradient_complexity_found.append(gradient_complexity_kept)
 
     mean_complexity_gradient = sum(gradient_complexity_found) / len(gradient_complexity_found)
-    print(mean_complexity_gradient)
+    std_complexity_gradient  = np.std(gradient_complexity_found)
+    
+    print('mean', mean_complexity_gradient)
+    print('std', std_complexity_gradient)
             
     with open(p_output_path, 'w') as f:
         print("Erase", p_output_path, "previous file if exists")
@@ -127,7 +145,7 @@ def main():
         complexity_list = data_complexity[5].split(',')
 
         # one element is removed using this function (first element of list for computing first gradient complexity)
-        entropy_gradient_list = get_sobel_entropy_complexity(entropy_list, complexity_list)
+        entropy_gradient_list = get_sobel_entropy_complexity(entropy_list, complexity_list, p_std)
         image_indices_without_first = image_indices[1:]
 
         # by default max index (if no stoppring criteria found)
@@ -152,6 +170,7 @@ def main():
             f.write(threshold + ';')
             f.write(threshold_found + ';')
             f.write(str(mean_complexity_gradient) + ';')
+            f.write(str(std_complexity_gradient) + ';')
             f.write(str(p_norm))
             f.write('\n')
 

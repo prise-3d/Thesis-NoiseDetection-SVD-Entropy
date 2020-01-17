@@ -20,18 +20,28 @@ zones_indices  = cfg.zones_indices
 '''
 Compute gradient from entropy list (first element is used as reference)
 '''
-def get_zone_gradient_entropy(entropy_list):
+def get_zone_gradient_entropy(entropy_list, std=False):
     
     dh_list = []
     previous_value = 0
     
+    entropy_list = list(map(float, entropy_list))
+
+    if std:
+        entropy_list_norm = utils.normalize_arr(entropy_list)
+
     for index, value in enumerate(entropy_list):
         
         if index > 0:
-            dh = 1 - (previous_value - float(value))
+            dh = 1 - (previous_value - value)
+
+            if std:
+                # ponderation using `std` from list normalized
+                dh = dh * np.std(entropy_list_norm[:(index+1)])
+
             dh_list.append(dh)
         
-        previous_value = float(value)
+        previous_value = value
         
     return dh_list
 
@@ -42,12 +52,14 @@ def main():
 
     parser.add_argument('--data', type=str, help='entropy file data to read and compute')
     parser.add_argument('--norm', type=int, help='normalize or not entropy', choices=[0, 1], default=0)
+    parser.add_argument('--std', type=int, help='multiply result by current std', choices=[0, 1], default=0)
     parser.add_argument('--output', type=str, help='prediction file used')
 
     args = parser.parse_args()
 
     p_data   = args.data
     p_norm   = args.norm
+    p_std    = args.std
     p_output = args.output
 
     # create output path if not exists
@@ -69,7 +81,7 @@ def main():
             entropy_list = data[5].split(',')
 
             # one element is removed using this function (first element of list for computing first gradienterence)
-            entropy_gradient_list = get_zone_gradient_entropy(entropy_list)
+            entropy_gradient_list = get_zone_gradient_entropy(entropy_list, p_std)
             image_indices_without_first = image_indices[1:]
 
             found_index = 0
@@ -88,7 +100,10 @@ def main():
             gradient_entropy_found.append(gradient_entropy_kept)
 
         mean_entropy_gradient = sum(gradient_entropy_found) / len(gradient_entropy_found)
-        print(mean_entropy_gradient)
+        std_entropy_gradient  = np.std(gradient_entropy_found)
+
+        print('mean ', mean_entropy_gradient)
+        print('std ', std_entropy_gradient)
             
         with open(p_output_path, 'w') as f:
             print("Erase", p_output_path, "previous file if exists")
@@ -105,7 +120,7 @@ def main():
             entropy_list = data[5].split(',')
 
             # one element is removed using this function (first element of list for computing first gradienterence)
-            entropy_gradient_list = get_zone_gradient_entropy(entropy_list)
+            entropy_gradient_list = get_zone_gradient_entropy(entropy_list, p_std)
             image_indices_without_first = image_indices[1:]
 
             # by default max index (if no stoppring criteria found)
@@ -130,6 +145,7 @@ def main():
                 f.write(threshold + ';')
                 f.write(threshold_found + ';')
                 f.write(str(mean_entropy_gradient) + ';')
+                f.write(str(std_entropy_gradient) + ';')
                 f.write(str(p_norm))
                 f.write('\n')
 

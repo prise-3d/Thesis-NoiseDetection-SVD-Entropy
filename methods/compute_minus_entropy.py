@@ -20,11 +20,16 @@ zones_indices  = cfg.zones_indices
 '''
 Compute diff from entropy list (first element is used as reference)
 '''
-def get_zone_minus_entropy(entropy_list):
+def get_zone_minus_entropy(entropy_list, std=False):
     
     dh_list = []
     previous_dh = 0
     
+    entropy_list = list(map(float, entropy_list))
+
+    if std:
+        entropy_list_norm = utils.normalize_arr(entropy_list)
+
     for index, value in enumerate(entropy_list):
         
         dh = 0
@@ -34,7 +39,12 @@ def get_zone_minus_entropy(entropy_list):
         else:
             dh = previous_dh - float(value)
 
-        dh_list.append(dh)
+            if std:
+                # ponderation using `std` from list normalized
+                dh = dh * np.std(entropy_list_norm[:(index+1)])
+
+            dh_list.append(dh)
+            
         previous_dh = dh
         
     return dh_list
@@ -46,12 +56,14 @@ def main():
 
     parser.add_argument('--data', type=str, help='entropy file data to read and compute')
     parser.add_argument('--norm', type=int, help='normalize or not entropy', choices=[0, 1], default=0)
+    parser.add_argument('--std', type=int, help='multiply result by current std', choices=[0, 1], default=0)
     parser.add_argument('--output', type=str, help='prediction file used')
 
     args = parser.parse_args()
 
     p_data   = args.data
     p_norm   = args.norm
+    p_std    = args.std
     p_output = args.output
 
     # create output path if not exists
@@ -73,7 +85,7 @@ def main():
             entropy_list = data[5].split(',')
 
             # no element is removed using this function
-            entropy_minus_list = get_zone_minus_entropy(entropy_list)
+            entropy_minus_list = get_zone_minus_entropy(entropy_list, p_std)
 
             found_index = 0
             for index, v in enumerate(image_indices):
@@ -91,7 +103,10 @@ def main():
             minus_entropy_found.append(diff_entropy_kept)
 
         mean_entropy_minus = sum(minus_entropy_found) / len(minus_entropy_found)
-        print(mean_entropy_minus)
+        std_entropy_minus = np.std(minus_entropy_found)
+        
+        print('mean', mean_entropy_minus)
+        print('std', std_entropy_minus)
             
         with open(p_output_path, 'w') as f:
             print("Erase", p_output_path, "previous file if exists")
@@ -108,7 +123,7 @@ def main():
             entropy_list = data[5].split(',')
 
             # no element is removed using this function
-            entropy_minus_list = get_zone_minus_entropy(entropy_list)
+            entropy_minus_list = get_zone_minus_entropy(entropy_list, p_std)
 
             # by default max index (if no stoppring criteria found)
             found_index = len(image_indices) - 1
@@ -132,6 +147,7 @@ def main():
                 f.write(threshold + ';')
                 f.write(threshold_found + ';')
                 f.write(str(mean_entropy_minus) + ';')
+                f.write(str(std_entropy_minus) + ';')
                 f.write(str(p_norm))
                 f.write('\n')
 
