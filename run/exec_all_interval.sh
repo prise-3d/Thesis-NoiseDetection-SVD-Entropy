@@ -32,12 +32,11 @@ for scene in {"A","B","C","D","E","F","G","H","I"}; do
     python utils/reconstruct_image_human.py --scene ${scene} --output data/images/${scene}_human.png
 done
 
-std=1
 
 # for each interval
 for norm in {0,1}; do
     for imnorm in {0,1}; do
-        #for std in {0,1}; do
+        for std in {0,1}; do
             for start in {0,50,100,150}; do
                 for end in {50,100,150,200}; do
                     result=$((end - start))
@@ -73,6 +72,6 @@ for norm in {0,1}; do
                     fi
                 done
             done
-        #done
+        done
     done
 done
