@@ -1,4 +1,4 @@
-list="complexity, complexity_pow, complexity_diff, complexity_entropy_norm, complexity_norm_entropy"
+list="complexity, complexity_pow, complexity_diff, complexity_entropy_norm, complexity_norm_entropy, complexity_entropy_diff"
 
 if [ -z "$1" ]
   then
@@ -32,10 +32,12 @@ for scene in {"A","B","C","D","E","F","G","H","I"}; do
     python utils/reconstruct_image_human.py --scene ${scene} --output data/images/${scene}_human.png
 done
 
+std=0 # here by default
+
 # for each interval
 for norm in {0,1}; do
     for imnorm in {0,1}; do
-        for std in {0,1}; do
+        #for std in {0,1}; do
             for ksize in {3,5,7,9,11,13}; do
                 for start in {0,50,100,150}; do
                     for end in {50,100,150,200}; do
@@ -77,6 +79,6 @@ for norm in {0,1}; do
                     done
                 done
             done
-        done
+        #done
     done
 done

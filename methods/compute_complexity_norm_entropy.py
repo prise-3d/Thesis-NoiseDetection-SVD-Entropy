@@ -26,26 +26,28 @@ def get_sobel_entropy_complexity(entropy_list, sobel_list, std=False):
     dh_list = []
     previous_entropy_value = 0
     previous_sobel_value = 0
+    
 
     entropy_list = list(map(float, entropy_list))
     sobel_list = list(map(float, sobel_list))
-    
+
     if std:
         entropy_list_norm = utils.normalize_arr(entropy_list)
         sobel_list_norm = utils.normalize_arr(sobel_list)
-
+    
     for i in range(len(entropy_list)):
         
         if i > 0:
             
-            entropy_diff = math.pow(previous_entropy_value - entropy_list[i], 2)
-            sobel_diff = math.pow(previous_sobel_value - sobel_list[i], 2)
+            entropy_diff = 1 - abs(previous_entropy_value - entropy_list[i])
+            sobel_diff = 1 - abs(previous_sobel_value - sobel_list[i])
             
             if std:
-                # ponderation using `std` from each list normalized
-                dh = (entropy_diff * np.std(entropy_list_norm[:(i+1)])) / (sobel_diff * np.std(sobel_list_norm[:(i+1)]))
+                # ponderation using `std` from each list
+                dh = (entropy_diff * np.std(entropy_list_norm[:(i+1)])) * (sobel_diff * np.std(sobel_list_norm[:(i+1)]))
             else:
-                dh = entropy_diff / (sobel_diff + sys.float_info.epsilon)
+                entropy_norm = utils.normalize_arr(entropy_list[:i+1])
+                dh = entropy_norm[i] * sobel_list[i]
 
             dh_list.append(dh)
         
@@ -57,7 +59,7 @@ def get_sobel_entropy_complexity(entropy_list, sobel_list, std=False):
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Read and compute complexity data file (using complexity and sobel with pow)")
+    parser = argparse.ArgumentParser(description="Read and compute complexity data file (using entropy and sobel diff)")
 
     parser.add_argument('--data1', type=str, help='entropy file data to read and compute')
     parser.add_argument('--data2', type=str, help='entropy file data to read and compute')
@@ -120,7 +122,7 @@ def main():
         gradient_complexity_found.append(gradient_complexity_kept)
 
     mean_complexity_gradient = sum(gradient_complexity_found) / len(gradient_complexity_found)
-    std_complexity_gradient = np.std(gradient_complexity_found)
+    std_complexity_gradient  = np.std(gradient_complexity_found)
     
     print('mean', mean_complexity_gradient)
     print('std', std_complexity_gradient)
