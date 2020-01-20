@@ -46,7 +46,7 @@ def get_sobel_entropy_complexity(entropy_list, sobel_list, std=False):
                 # ponderation using `std` from each list
                 dh = (entropy_diff * np.std(entropy_list_norm[:(i+1)])) * (sobel_diff * np.std(sobel_list_norm[:(i+1)]))
             else:
-                dh = entropy_diff * sobel_diff
+                dh = entropy_diff * (sobel_diff + sys.float_info.epsilon)
 
             dh_list.append(dh)
         
