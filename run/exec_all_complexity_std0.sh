@@ -7,7 +7,7 @@ if [ -z "$1" ]
     exit 1
 fi
 
-if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff)$ ]]; then
+if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff|complexity_entropy_norm|complexity_norm_entropy|complexity_entropy_diff)$ ]]; then
     method=$1
     echo "Start computing each scene result using '${method}' approach from entropy and sobel complexity..."
     echo "-------------------------------------------------------------------------------------------"
