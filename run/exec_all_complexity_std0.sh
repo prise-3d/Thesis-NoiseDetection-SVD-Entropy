@@ -1,4 +1,4 @@
-list="complexity, complexity_pow, complexity_diff, complexity_entropy_norm, complexity_norm_entropy, complexity_entropy_diff"
+list="complexity, complexity_pow, complexity_diff, complexity_norm, complexity_norm2, complexity_sobel_norm"
 
 if [ -z "$1" ]
   then
@@ -7,7 +7,7 @@ if [ -z "$1" ]
     exit 1
 fi
 
-if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff|complexity_entropy_norm|complexity_norm_entropy|complexity_entropy_diff)$ ]]; then
+if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff|complexity_norm|complexity_norm2|complexity_sobel_norm)$ ]]; then
     method=$1
     echo "Start computing each scene result using '${method}' approach from entropy and sobel complexity..."
     echo "-------------------------------------------------------------------------------------------"
