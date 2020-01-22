@@ -8,6 +8,10 @@ logs_folder                             = 'logs'
 backup_folder                           = 'backups'
 references_folder                       = 'references'
 
+data_generated                          = 'generated'
+data_thresholds                         = 'thresholds'
+data_results                            = 'results'
+
 ## min_max_custom_folder           = 'custom_norm'
 ## correlation_indices_folder      = 'corr_indices'
 

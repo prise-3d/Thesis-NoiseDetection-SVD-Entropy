@@ -63,9 +63,10 @@ def main():
     p_output = args.output
 
     # create output path if not exists
-    p_output_path = os.path.join(cfg.output_data_folder, p_output)
-    if not os.path.exists(cfg.output_data_folder):
-        os.makedirs(cfg.output_data_folder)
+    threshold_path = os.path.join(cfg.output_data_folder, cfg.data_thresholds)
+    p_output_path = os.path.join(threshold_path, p_output)
+    if not os.path.exists(threshold_path):
+        os.makedirs(threshold_path)
 
     # read line by line file to estimate threshold entropy stopping criteria
     with open(p_data, 'r') as f:

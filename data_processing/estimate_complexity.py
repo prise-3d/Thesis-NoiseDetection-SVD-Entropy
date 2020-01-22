@@ -87,7 +87,7 @@ def main():
     p_imnorm   = args.imnorm
 
     # create output path if not exists
-    p_output_path = os.path.join(cfg.output_data_folder, p_output)
+    p_output_path = os.path.join(cfg.output_data_folder, cfg.data_generated, p_output)
     if not os.path.exists(cfg.output_data_folder):
         os.makedirs(cfg.output_data_folder)
     

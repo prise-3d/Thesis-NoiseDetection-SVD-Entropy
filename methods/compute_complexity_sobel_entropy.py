@@ -44,7 +44,7 @@ def get_sobel_entropy_complexity(entropy_list, sobel_list, std=False):
             
             if std:
                 # ponderation using `std` from each list
-                dh = (entropy_diff * np.std(entropy_list_norm[:(i+1)])) * (sobel_diff * np.std(sobel_list_norm[:(i+1)]))
+                dh = entropy_diff * np.std(entropy_list[:(i+1)])  * np.std(sobel_list[:(i+1)])
             else:
                 dh = entropy_diff * sobel_list[i]
 
@@ -75,9 +75,10 @@ def main():
     p_output = args.output
 
     # create output path if not exists
-    p_output_path = os.path.join(cfg.output_data_folder, p_output)
-    if not os.path.exists(cfg.output_data_folder):
-        os.makedirs(cfg.output_data_folder)
+    threshold_path = os.path.join(cfg.output_data_folder, cfg.data_thresholds)
+    p_output_path = os.path.join(threshold_path, p_output)
+    if not os.path.exists(threshold_path):
+        os.makedirs(threshold_path)
 
 
     # read line by line file to estimate threshold entropy stopping criteria

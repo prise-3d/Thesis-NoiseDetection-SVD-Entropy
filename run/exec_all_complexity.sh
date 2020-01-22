@@ -1,4 +1,4 @@
-list="complexity, complexity_pow, complexity_diff, complexity_entropy_norm, complexity_norm_entropy"
+list="complexity, complexity_diff, complexity_norm, complexity_norm2, complexity_sobel"
 
 if [ -z "$1" ]
   then
@@ -7,7 +7,7 @@ if [ -z "$1" ]
     exit 1
 fi
 
-if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff)$ ]]; then
+if [[ "$1" =~ ^(complexity|complexity_pow|complexity_diff|complexity_norm|complexity_norm2|complexity_sobel)$ ]]; then
     method=$1
     echo "Start computing each scene result using '${method}' approach from entropy and sobel complexity..."
     echo "-------------------------------------------------------------------------------------------"
@@ -42,37 +42,38 @@ for norm in {0,1}; do
                         result=$((end - start))
                         if [ $result -gt 0 ]; then
                             
-                            python methods/compute_${method}_entropy.py --data1 data/entropy_data_imnorm${imnorm}_${start}_${end}.csv --data2 data/complexity_data_imnorm${imnorm}_${ksize}.csv --norm ${norm} --std ${std} --output entropy_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}.csv
+                            python methods/compute_${method}_entropy.py --data1 data/generated/entropy_data_imnorm${imnorm}_${start}_${end}.csv --data2 data/generated/complexity_data_imnorm${imnorm}_${ksize}.csv --norm ${norm} --std ${std} --output entropy_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}.csv
 
                             output_filename="results/comparisons_imnorm${imnorm}_${method}_norm${norm}_std${std}_${metric}_k${ksize}_${start}_${end}"
-                            md_filename="${output_filename}.md"
-                            csv_filename="${output_filename}.csv"
-
-                            rm ${md_filename}
-                            rm ${csv_filename}
                             
-                            # write into markdown file (human readable)
-                            echo "------|-----------|-------|--------" >> ${md_filename}
-                            echo "Scene | Estimated | Human | Metric " >> ${md_filename}
-                            echo "------|-----------|-------|--------" >> ${md_filename}
+                            # md_filename="${output_filename}.md"
+                            # csv_filename="${output_filename}.csv"
 
-                            for scene in {"A","B","C","D","E","F","G","H","I"}; do
+                            # rm ${md_filename}
+                            # rm ${csv_filename}
+                            
+                            # # write into markdown file (human readable)
+                            # echo "------|-----------|-------|--------" >> ${md_filename}
+                            # echo "Scene | Estimated | Human | Metric " >> ${md_filename}
+                            # echo "------|-----------|-------|--------" >> ${md_filename}
 
-                                reference_image="references/${scene}_${scenes_ref_index[$scene]}.png"
+                            # for scene in {"A","B","C","D","E","F","G","H","I"}; do
+
+                            #     reference_image="references/${scene}_${scenes_ref_index[$scene]}.png"
                                 
-                                python utils/reconstruct_image_estimated.py --data data/entropy_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}.csv --scene ${scene} --output data/images/${scene}_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}_estimated.png
+                            #     python utils/reconstruct_image_estimated.py --data data/entropy_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}.csv --scene ${scene} --output data/images/${scene}_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}_estimated.png
 
-                                estimated_error=$(python utils/compare_images.py --img1 ${reference_image} --img2 data/images/${scene}_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}_estimated.png --metric ${metric})
-                                human_error=$(python utils/compare_images.py --img1 ${reference_image} --img2 data/images/${scene}_human.png --metric ${metric})
+                            #     estimated_error=$(python utils/compare_images.py --img1 ${reference_image} --img2 data/images/${scene}_${method}_imnorm${imnorm}_norm${norm}_std${std}_k${ksize}_${start}_${end}_estimated.png --metric ${metric})
+                            #     human_error=$(python utils/compare_images.py --img1 ${reference_image} --img2 data/images/${scene}_human.png --metric ${metric})
 
-                                echo "${scene}|${estimated_error}|${human_error}|${metric}" >> ${md_filename}
-                                echo "${scene};${estimated_error};${human_error};${metric}" >> ${csv_filename}
+                            #     echo "${scene}|${estimated_error}|${human_error}|${metric}" >> ${md_filename}
+                            #     echo "${scene};${estimated_error};${human_error};${metric}" >> ${csv_filename}
 
-                                echo "---------------------------------"
-                                echo "-- Scene ${scene} (${method}) -- "
-                                echo "Estimated (${metric}): ${estimated_error}"
-                                echo "Human     (${metric}): ${human_error}"
-                            done
+                            #     echo "---------------------------------"
+                            #     echo "-- Scene ${scene} (${method}) -- "
+                            #     echo "Estimated (${metric}): ${estimated_error}"
+                            #     echo "Human     (${metric}): ${human_error}"
+                            # done
                         fi
                     done
                 done

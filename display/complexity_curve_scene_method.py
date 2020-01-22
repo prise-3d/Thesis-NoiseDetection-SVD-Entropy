@@ -53,7 +53,7 @@ def get_zone_diff_entropy(entropy_list, std=False):
     return diff_list
 
 
-def display_estimated_thresholds(scene, displayed_data, norm=True):
+def display_estimated_thresholds(scene, displayed_data, info, metric, norm=True):
     
     colors = ['C0', 'C1', 'C2', 'C3', 'C4']
     
@@ -62,7 +62,7 @@ def display_estimated_thresholds(scene, displayed_data, norm=True):
     plt.rc('ytick', labelsize=16)    # fontsize of the tick labels
     
     fig, axs = plt.subplots(4, 4, figsize=(25, 20))
-    fig.suptitle('Complexity value evolution in scene' + scene, fontsize=24)
+    fig.suptitle('Complexity value evolution in scene' + scene + " | " + info, fontsize=24)
     
     for i, ax in enumerate(axs.flat):
         
@@ -83,7 +83,7 @@ def display_estimated_thresholds(scene, displayed_data, norm=True):
 
         ax.plot(error_values, 
             color=colors[1], 
-            label='error values')
+            label= metric + ' error')
         
 
         # get max `y` value
@@ -128,6 +128,7 @@ def main():
     parser.add_argument('--scene', type=str, help='Scene index to use', choices=cfg.scenes_indices)
     parser.add_argument('--metric', type=str, help='metric to use to compare', choices=['ssim', 'mse', 'rmse', 'mae', 'psnr'])
     parser.add_argument('--norm', type=int, help='normalize or not values', choices=[0, 1], default=0)
+    parser.add_argument('--info', type=str, help='title information to add')
 
     args = parser.parse_args()
 
@@ -135,6 +136,7 @@ def main():
     p_scene  = args.scene
     p_metric = args.metric
     p_norm   = args.norm
+    p_info   = args.info
 
     # check fr_iqa metric
     try:
@@ -201,7 +203,7 @@ def main():
 
                 displayed_data[zone_index]['errors'] = errors
 
-    display_estimated_thresholds(scene, displayed_data, p_norm)
+    display_estimated_thresholds(scene, displayed_data, p_info, p_metric, p_norm)
 
 if __name__== "__main__":
     main()
