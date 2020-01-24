@@ -12,6 +12,7 @@ import custom_config as cfg
 def main():
 
     thresholds_folder = os.path.join(cfg.output_data_folder, cfg.data_thresholds)
+    
     files_dir = os.listdir(thresholds_folder)
     csv_results_files = [ f for f in files_dir if '.csv' in f and 'analysis' not in f]
 

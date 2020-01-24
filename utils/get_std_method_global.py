@@ -2,7 +2,16 @@
 import os, sys
 
 
-std_file_results = "results/std_analysis.csv"
+
+# modules and config imports
+sys.path.insert(0, '') # trick to enable import of main folder module
+
+import custom_config as cfg
+
+
+results_folder = os.path.join(cfg.output_data_folder, cfg.data_results)
+
+std_file_results = results_folder + "/std_analysis.csv"
 
 
 def main():

@@ -1,8 +1,13 @@
 # main imports
 import os, sys
 
+# modules and config imports
+sys.path.insert(0, '') # trick to enable import of main folder module
 
-results_folder = "results"
+import custom_config as cfg
+
+
+results_folder = os.path.join(cfg.output_data_folder, cfg.data_results)
 
 
 def main():
