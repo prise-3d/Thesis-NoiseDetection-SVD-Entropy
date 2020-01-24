@@ -24,7 +24,7 @@ output_directory="data/results"
 
 if [ ! -d "$output_directory" ]; then
     # Control will enter here if $DIRECTORY doesn't exist.
-    mkdir $output_directory
+    mkdir -p $output_directory
 fi
 
 # compute only one time human threshold image
