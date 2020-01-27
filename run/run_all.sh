@@ -9,3 +9,7 @@ bash run/exec_all_complexity.sh complexity_sobel
 bash run/exec_all_interval.sh diff
 bash run/exec_all_interval.sh gradient
 bash run/exec_all_interval.sh minus
+
+# diff_sobel_svd_entropy, gradient_sobel_svd_entropy 
+bash run/exec_all_sobel_svd_entropy.sh diff_sobel_svd_entropy
+bash run/exec_all_sobel_svd_entropy.sh gradient_sobel_svd_entropy
