@@ -82,7 +82,7 @@ def main():
             entropy_list = data[5].split(',')
 
             # one element is removed using this function (first element of list for computing first gradienterence)
-            entropy_gradient_list = get_zone_gradient_entropy(entropy_list, p_std)
+            entropy_gradient_list = get_zone_gradient_sobel_svd_entropy(entropy_list, p_std)
             image_indices_without_first = image_indices[1:]
 
             found_index = 0

@@ -121,7 +121,7 @@ def main():
             entropy_list = data[5].split(',')
 
             # one element is removed using this function (first element of list for computing first difference)
-            entropy_diff_list = get_zone_diff_entropy(entropy_list, p_std)
+            entropy_diff_list = get_zone_diff_sobel_svd_entropy(entropy_list, p_std)
             image_indices_without_first = image_indices[1:]
 
             # by default max index (if no stoppring criteria found)

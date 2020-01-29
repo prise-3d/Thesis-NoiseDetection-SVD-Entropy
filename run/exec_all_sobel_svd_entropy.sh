@@ -1,4 +1,4 @@
-list="diff_sobel_svd_entropy, gradient_sobel_svd_entropy"
+list="diff_sobel_svd, gradient_sobel_svd"
 
 if [ -z "$1" ]
   then
@@ -7,7 +7,7 @@ if [ -z "$1" ]
     exit 1
 fi
 
-if [[ "$1" =~ ^(diff_sobel_svd_entropy|gradient_sobel_svd_entropy)$ ]]; then
+if [[ "$1" =~ ^(diff_sobel_svd|gradient_sobel_svd)$ ]]; then
     method=$1
     echo "Start computing each scene result using '${method}' approach from entropy complexity..."
     echo "--------------------------------------------------------------------------"
