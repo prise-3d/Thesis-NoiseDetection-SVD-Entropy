@@ -49,10 +49,12 @@ do
         nb_paths=${ADDR[0]}
 
         file_path=$folder/$file
+        file_path=${file_path//\/\//\/}
 
         # get first image as the most noisy
         if [ $counter -le 0 ]; then
-            noisy_path=$file
+            noisy_path=$folder/$file
+            noisy_path=${noisy_path//\/\//\/}
             counter=$((${counter} + 1))
         else
             # compute vdp diff between `most noisy` and `current image`
