@@ -57,9 +57,16 @@ do
             noisy_path=${noisy_path//\/\//\/}
             counter=$((${counter} + 1))
         else
-            # compute vdp diff between `most noisy` and `current image`
-            # need to take that we will be into `hdrvdp` folder
-            echo matlab -nodesktop -nodisplay -nosplash -r "path_ref='../${file_path}';path_noisy='../${noisy_path}';prefix='../${output_folder}/vdp_diff_${folder_name}_${nb_paths}';${hdrvdp_folder}/run;exit"
+
+            if [[ "${file_path}" = /* ]]; then
+                # compute vdp diff between `most noisy` and `current image`
+                # need to take that we will be into `hdrvdp` folder
+                echo matlab -nodesktop -nodisplay -nosplash -r "path_ref='${file_path}';path_noisy='${noisy_path}';prefix='${output_folder}/vdp_diff_${folder_name}_${nb_paths}';${hdrvdp_folder}/run;exit"
+            else 
+                # compute vdp diff between `most noisy` and `current image`
+                # need to take that we will be into `hdrvdp` folder
+                echo matlab -nodesktop -nodisplay -nosplash -r "path_ref='../${file_path}';path_noisy='../${noisy_path}';prefix='../${output_folder}/vdp_diff_${folder_name}_${nb_paths}';${hdrvdp_folder}/run;exit"
+            fi
         fi
     done
 done
