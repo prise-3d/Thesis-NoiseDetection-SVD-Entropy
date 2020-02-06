@@ -2,7 +2,8 @@
 # here need to get all outputs of this script and copy/paste into run oar script
 
 # load matlab module into oar server
-echo ml matlab
+echo source /nfs/opt/env/env.sh
+echo module load matlab
 
 if [ -z "$1" ]
   then
