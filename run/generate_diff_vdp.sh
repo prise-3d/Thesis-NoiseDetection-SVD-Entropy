@@ -22,7 +22,7 @@ hdrvdp_folder="hdrvdp"
 dataset=$1
 output=$2
 
-for folder in $(ls -d -- ${dataset}/*/)
+for folder in $(ls -d -- ${dataset}*)
 do
     # default variable value
     counter=0
@@ -35,7 +35,7 @@ do
     # construct output folder
     output_folder=$output/$folder_name
     mkdir -p ${output_folder}
-    
+
     for file in $(ls -f -- $folder* | grep .png)
     do 
         # get number of path for current generated image
@@ -48,14 +48,16 @@ do
         IFS='.' read -ra ADDR <<< "${postfix}"
         nb_paths=${ADDR[0]}
 
+        file_path=$folder/$file
+
         # get first image as the most noisy
         if [ $counter -le 0 ]; then
             noisy_path=$file
             counter=$((${counter} + 1))
         else
-            # compute vdp diff between 
+            # compute vdp diff between `most noisy` and `current image`
             # need to take that we will be into `hdrvdp` folder
-            echo matlab -nodesktop -nodisplay -nosplash -r "path_ref='../${file}';path_noisy='../${noisy_path}';prefix='../${output_folder}/vdp_diff_${folder_name}_${nb_paths}';${hdrvdp_folder}/run;exit"
+            echo matlab -nodesktop -nodisplay -nosplash -r "path_ref='../${file_path}';path_noisy='../${noisy_path}';prefix='../${output_folder}/vdp_diff_${folder_name}_${nb_paths}';${hdrvdp_folder}/run;exit"
         fi
     done
 done
