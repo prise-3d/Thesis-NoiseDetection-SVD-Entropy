@@ -22,7 +22,7 @@ hdrvdp_folder="hdrvdp"
 dataset=$1
 output=$2
 
-for folder in $(ls -d -- ${dataset}*)
+for folder in $(ls -d -- ${dataset}/*)
 do
     # default variable value
     counter=0
@@ -36,7 +36,7 @@ do
     output_folder=$output/$folder_name
     mkdir -p ${output_folder}
 
-    for file in $(ls -f -- $folder* | grep .png)
+    for file in $(ls -f -- $folder/* | grep .png)
     do 
         # get number of path for current generated image
         IFS='/' read -ra ADDR <<< "${file}"
@@ -48,12 +48,12 @@ do
         IFS='.' read -ra ADDR <<< "${postfix}"
         nb_paths=${ADDR[0]}
 
-        file_path=$folder/$file
+        file_path=$file
         file_path=${file_path//\/\//\/}
 
         # get first image as the most noisy
         if [ $counter -le 0 ]; then
-            noisy_path=$folder/$file
+            noisy_path=$file
             noisy_path=${noisy_path//\/\//\/}
             counter=$((${counter} + 1))
         else
