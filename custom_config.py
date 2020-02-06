@@ -11,6 +11,7 @@ references_folder                       = 'references'
 data_generated                          = 'generated'
 data_thresholds                         = 'thresholds'
 data_results                            = 'results'
+data_fig_folder                         = 'tmp_images'
 
 ## min_max_custom_folder           = 'custom_norm'
 ## correlation_indices_folder      = 'corr_indices'

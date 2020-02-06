@@ -53,7 +53,7 @@ def get_zone_diff_entropy(entropy_list, std=False):
     return diff_list
 
 
-def display_estimated_thresholds(scene, displayed_data, info, metric, norm=True):
+def display_estimated_thresholds(scene, displayed_data, info, metric, norm=True, save=True):
     
     colors = ['C0', 'C1', 'C2', 'C3', 'C4']
     
@@ -110,13 +110,25 @@ def display_estimated_thresholds(scene, displayed_data, info, metric, norm=True)
         x = [i for i, v in enumerate(image_indices) if int(v) % display_xticks_step == 0 ]
         ax.set_xticks(x)
         ax.set_xticklabels(x_labels, rotation=45)
-        ax.legend(fontsize=16)
+        #ax.legend(fontsize=16)
+
+        if i >= len(axs.flat) - 1:
+            handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper right', bbox_to_anchor=(0.9, 0.95), fontsize=18)
 
     for ax in axs.flat:
         ax.label_outer()
     
     #fig.tight_layout()
-    plt.show()
+    if save:
+        fig_folder = os.path.join(cfg.output_data_folder, cfg.data_fig_folder)
+
+        if not os.path.exists(fig_folder):
+            os.makedirs(fig_folder)
+
+        fig.savefig(os.path.join(fig_folder, 'temp.png'), transparent=True)
+    else:
+        plt.show()
 
 
 

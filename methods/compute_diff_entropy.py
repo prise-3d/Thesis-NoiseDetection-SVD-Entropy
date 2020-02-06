@@ -17,6 +17,8 @@ dataset_folder = cfg.dataset_path
 scenes_list    = cfg.scenes_names
 zones_indices  = cfg.zones_indices
 
+k_factor = 1.4
+
 '''
 Compute diff from entropy list (first element is used as reference)
 '''
@@ -33,15 +35,19 @@ def get_zone_diff_entropy(entropy_list, std=False):
     for index, value in enumerate(entropy_list):
         
         if index > 0:
-            diff = previous_value - value
 
             if std:
                 # ponderation using `std` from list normalized
-                diff = diff * np.std(entropy_list_norm[:(index+1)])
+                diff = previous_value - np.std(entropy_list[:(index+1)])
+            else:
+                diff = previous_value - value
 
             diff_list.append(diff)
 
-        previous_value = value
+        if std:
+            previous_value = np.std(entropy_list_norm[:(index+1)])
+        else:
+            previous_value = value
         
     return diff_list
 
@@ -54,13 +60,28 @@ def main():
     parser.add_argument('--norm', type=int, help='normalize or not entropy', choices=[0, 1], default=0)
     parser.add_argument('--std', type=int, help='multiply result by current std', choices=[0, 1], default=0)
     parser.add_argument('--output', type=str, help='prediction file used')
+    parser.add_argument('--train_scenes', type=str, help='list of train scenes used', default='')
 
     args = parser.parse_args()
 
-    p_data   = args.data
-    p_norm   = args.norm
-    p_std    = args.std
-    p_output = args.output
+    p_data         = args.data
+    p_norm         = args.norm
+    p_std          = args.std
+    p_output       = args.output
+    p_train_scenes = args.train_scenes.split(',')
+
+     # list all possibles choices of renderer
+    scenes_list = cfg.scenes_names
+    scenes_indices = cfg.scenes_indices
+
+    # getting scenes from indexes user selection
+    scenes_selected = []
+
+    for scene_id in p_train_scenes:
+        index = scenes_indices.index(scene_id.strip())
+        scenes_selected.append(scenes_list[index])
+
+    print("Scenes used in train:", scenes_selected)
 
     # create output path if not exists
     threshold_path = os.path.join(cfg.output_data_folder, cfg.data_thresholds)
@@ -77,28 +98,34 @@ def main():
 
             data = line.split(';')
 
-            threshold = data[3]
-            image_indices = data[4].split(',')
-            entropy_list = data[5].split(',')
+            scene_name = data[0]
 
-            # one element is removed using this function (first element of list for computing first difference)
-            entropy_diff_list = get_zone_diff_entropy(entropy_list, p_std)
-            image_indices_without_first = image_indices[1:]
+            # only if scene is used for training part
+            if scene_name in scenes_selected:
+                    
+                threshold = data[3]
+                image_indices = data[4].split(',')
+                entropy_list = data[5].split(',')
 
-            found_index = 0
-            for index, v in enumerate(image_indices_without_first):
+                # one element is removed using this function (first element of list for computing first difference)
+                entropy_diff_list = get_zone_diff_entropy(entropy_list, p_std)
+                image_indices_without_first = image_indices[1:]
+
+                found_index = 0
+                for index, v in enumerate(image_indices_without_first):
+                    
+                    if int(v) > int(threshold):
+                        found_index = index
+                        break
                 
-                if int(v) > int(threshold):
-                    found_index = index
-                    break
+                if p_norm:
+                    diff_entropy_kept = utils.normalize_arr(entropy_diff_list[:found_index+1])[-1]
+                else:
+                    diff_entropy_kept = entropy_diff_list[found_index]
             
-            if p_norm:
-                diff_entropy_kept = utils.normalize_arr(entropy_diff_list[:found_index+1])[-1]
-            else:
-                diff_entropy_kept = entropy_diff_list[found_index]
-            
-            # Keep only absolute value
-            diff_entropy_found.append(diff_entropy_kept)
+                # Keep only absolute value
+                diff_entropy_found.append(diff_entropy_kept)
+
 
         mean_entropy_diff = sum(diff_entropy_found) / len(diff_entropy_found)
         std_entropy_diff = np.std(diff_entropy_found)
@@ -133,7 +160,7 @@ def main():
                 else:
                     current_v = v
 
-                if mean_entropy_diff > current_v:
+                if mean_entropy_diff > current_v * k_factor:
                     found_index = index
                     break
 

@@ -103,6 +103,10 @@ def main():
             # Keep only absolute value
             minus_entropy_found.append(diff_entropy_kept)
 
+        # TODO : test this part
+        if p_norm:
+            diff_entropy_found = utils.normalize_arr(diff_entropy_found)
+            
         mean_entropy_minus = sum(minus_entropy_found) / len(minus_entropy_found)
         std_entropy_minus = np.std(minus_entropy_found)
         

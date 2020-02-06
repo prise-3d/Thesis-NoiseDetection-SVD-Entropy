@@ -1,6 +1,6 @@
 [submodule "modules"]
 	path = modules
 	url = https://github.com/prise-3d/Thesis-CommonModules.git
-[submodule "optimization"]
-	path = optimization
-	url = https://github.com/prise-3d/Thesis-OptimizationModules.git
+[submodule "hdrvdp"]
+	path = hdrvdp
+	url = https://gogs.univ-littoral.fr/Prise3D/p3d-hdrvdp-2.git
