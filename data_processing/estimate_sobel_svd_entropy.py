@@ -96,8 +96,8 @@ def main():
     # create output path if not exists
     p_output_path = os.path.join(cfg.output_data_folder, cfg.data_generated, p_output)
     if not os.path.exists(cfg.output_data_folder):
-        os.makedirs(cfg.output_data_folder)
-    
+        os.makedirs(os.path.join(cfg.output_data_folder, cfg.data_generated))
+        
     zones_list = []
 
     # construct zones folder

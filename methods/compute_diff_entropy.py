@@ -77,9 +77,13 @@ def main():
     # getting scenes from indexes user selection
     scenes_selected = []
 
-    for scene_id in p_train_scenes:
-        index = scenes_indices.index(scene_id.strip())
-        scenes_selected.append(scenes_list[index])
+    # if training set is empty then use all scenes
+    if p_train_scenes[0] == '':
+        scenes_selected = scenes_list
+    else:
+        for scene_id in p_train_scenes:
+            index = scenes_indices.index(scene_id.strip())
+            scenes_selected.append(scenes_list[index])
 
     print("Scenes used in train:", scenes_selected)
 
