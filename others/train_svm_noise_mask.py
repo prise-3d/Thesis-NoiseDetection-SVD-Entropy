@@ -133,6 +133,7 @@ def main():
 
     x_train_data = [ x for (y, x) in train_dict_data ]
     y_train_data = [ y for (y, x) in train_dict_data ]
+    print(y_train_data)
 
     x_test_data = [ x for (y, x) in test_dict_data ]
     y_test_data = [ y for (y, x) in test_dict_data ]
@@ -158,7 +159,7 @@ def main():
     if not os.path.exists(saved_models_folder):
         os.makedirs(saved_models_folder)
 
-    joblib.dump(model, saved_models_folder + '/' + p_output + '.joblib')
+    joblib.dump(model, os.path.join(saved_models_folder, p_output + '.joblib'))
 
 if __name__ == "__main__":
     main()
