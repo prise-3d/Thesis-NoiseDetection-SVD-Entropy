@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 # ml imports
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
+import joblib
 
 # modules and config imports
 sys.path.insert(0, '') # trick to enable import of main folder module

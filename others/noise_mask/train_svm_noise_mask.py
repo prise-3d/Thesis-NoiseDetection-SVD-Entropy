@@ -97,6 +97,8 @@ def main():
     train_dict_data = []
     test_dict_data = []
 
+    print('--------------------------------------------')
+    
     # create dictionnary of threshold and get all images path
     for scene in scenes_list:
 
