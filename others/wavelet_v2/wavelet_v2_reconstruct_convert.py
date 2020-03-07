@@ -162,7 +162,7 @@ def main():
 
         for index, img_path in enumerate(images_path[scene]):
 
-            if index <= len(images_path[scene]) - 1:
+            if index < len(images_path[scene]) - 1:
                 image_to_convert = Image.open(img_path)
                 img_lab = transform.get_LAB_L(image_to_convert)
 
