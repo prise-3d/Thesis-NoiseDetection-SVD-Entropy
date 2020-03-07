@@ -166,7 +166,7 @@ def main():
                 image_to_convert = Image.open(img_path)
                 img_lab = transform.get_LAB_L(image_to_convert)
 
-                next_img = Image.open(images_path[scene][index])
+                next_img = Image.open(images_path[scene][index+1])
                 next_img_lab = transform.get_LAB_L(next_img)
 
                 diff_image = img_lab - next_img_lab
