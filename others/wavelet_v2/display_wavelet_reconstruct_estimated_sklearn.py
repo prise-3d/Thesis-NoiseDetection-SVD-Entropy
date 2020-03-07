@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import sys, os, argparse
+import time
 
 # image processing
 import cv2
@@ -31,93 +32,6 @@ scenes_list    = cfg.scenes_names
 zones_indices  = cfg.zones_indices
 
 
-def get_image_features(img_lab):
-    """
-    Method which returns the data type expected
-    """
-
-    img_width, img_height = 200, 200
-    arr = img_lab
-
-    # compute all filters statistics
-    def get_stats(arr, I_filter):
-
-        # e1       = np.abs(arr - I_filter)
-        # L        = np.array(e1)
-        # mu0      = np.mean(L)
-        # A        = L - mu0
-        # H        = A * A
-        # E        = np.sum(H) / (img_width * img_height)
-        # P        = np.sqrt(E)
-
-        # return mu0, P
-
-        return np.mean(I_filter), np.std(I_filter)
-
-    stats = []
-
-    kernel = np.ones((3,3),np.float32)/9
-    stats.append(get_stats(arr, cv2.filter2D(arr,-1,kernel)))
-
-    kernel = np.ones((5,5),np.float32)/25
-    stats.append(get_stats(arr, cv2.filter2D(arr,-1,kernel)))
-
-    stats.append(get_stats(arr, cv2.GaussianBlur(arr, (3, 3), 0.5)))
-
-    stats.append(get_stats(arr, cv2.GaussianBlur(arr, (3, 3), 1)))
-
-    stats.append(get_stats(arr, cv2.GaussianBlur(arr, (3, 3), 1.5)))
-
-    stats.append(get_stats(arr, cv2.GaussianBlur(arr, (5, 5), 0.5)))
-
-    stats.append(get_stats(arr, cv2.GaussianBlur(arr, (5, 5), 1)))
-
-    stats.append(get_stats(arr, cv2.GaussianBlur(arr, (5, 5), 1.5)))
-
-    stats.append(get_stats(arr, medfilt2d(arr, [3, 3])))
-
-    stats.append(get_stats(arr, medfilt2d(arr, [5, 5])))
-
-    stats.append(get_stats(arr, wiener(arr, [3, 3])))
-
-    stats.append(get_stats(arr, wiener(arr, [5, 5])))
-
-    wave = w2d(arr, 'db1', 2)
-    stats.append(get_stats(arr, np.array(wave, 'float64')))
-
-    data = []
-
-    for stat in stats:
-        data.append(stat[0])
-
-    for stat in stats:
-        data.append(stat[1])
-    
-    # data normalization
-    data = np.array(utils.normalize_arr(data))
-
-    return data
-
-
-def w2d(arr, mode='haar', level=1):
-    #convert to float   
-    imArray = arr
-    np.divide(imArray, 255)
-
-    # compute coefficients 
-    coeffs=pywt.wavedec2(imArray, mode, level=level)
-
-    #Process Coefficients
-    coeffs_H=list(coeffs)  
-    coeffs_H[0] *= 0
-
-    # reconstruction
-    imArray_H = pywt.waverec2(coeffs_H, mode)
-    imArray_H *= 255
-    imArray_H = np.uint8(imArray_H)
-
-    return imArray_H
-
 '''
 Display progress information as progress bar
 '''
@@ -139,6 +53,60 @@ def write_progress(progress):
     sys.stdout.write("\033[F")
 
 
+def get_image_reconstructed(lab_arr):
+    """
+    Method which returns the reconstructed image after all filters applied and reconstruction
+    """
+
+    kernel = np.ones((3,3),np.float32)/9.
+    arr = cv2.filter2D(lab_arr,-1,kernel)
+
+    kernel = np.ones((5,5),np.float32)/25.
+    arr = cv2.filter2D(arr,-1,kernel)
+
+    arr = cv2.GaussianBlur(arr, (3, 3), 0.5)
+
+    arr = cv2.GaussianBlur(arr, (3, 3), 1)
+
+    arr = cv2.GaussianBlur(arr, (3, 3), 1.5)
+
+    arr = cv2.GaussianBlur(arr, (5, 5), 0.5)
+
+    arr = cv2.GaussianBlur(arr, (5, 5), 1)
+
+    arr = cv2.GaussianBlur(arr, (5, 5), 1.5)
+
+    arr = medfilt2d(arr, [3, 3])
+
+    arr = medfilt2d(arr, [5, 5])
+
+    arr = wiener(arr, [3, 3])
+
+    arr = wiener(arr, [5, 5])
+
+    wave = w2d(arr, 'db1', 2)
+        
+    return lab_arr - wave
+
+
+def w2d(arr, mode='haar', level=1):
+    #convert to float   
+    imArray = arr
+    np.divide(imArray, 255)
+
+    # compute coefficients 
+    coeffs=pywt.wavedec2(imArray, mode, level=level)
+
+    #Process Coefficients
+    coeffs_H=list(coeffs)  
+    coeffs_H[0] *= 0
+
+    # reconstruction
+    imArray_H = pywt.waverec2(coeffs_H, mode)
+    imArray_H *= 255
+    imArray_H = np.uint8(imArray_H)
+
+    return imArray_H
 
 def display_estimated_thresholds(scene, estimated, humans):
     
@@ -220,12 +188,11 @@ def main():
     number_of_images = len(scenes_images)
     image_counter = 0
 
-    print(scenes_images)
-
     # compute simulation over scene 
     for img_path in scenes_images:
 
         scene_img_path = os.path.join(scene_path, img_path)
+        print(scene_img_path)
 
         blocks = segmentation.divide_in_blocks(Image.open(scene_img_path), (200, 200))
 
@@ -237,24 +204,30 @@ def main():
 
                 # convert image into L
                 img_lab = transform.get_LAB_L(block)
-                input_data = get_image_features(img_lab)
-
-                y = model.predict(input_data.reshape(1, -1))[0]
+                img_input = get_image_reconstructed(img_lab)
                 
-                if y != 1:
+                img_input = np.array(img_input, 'uint8')
+
+                w, h = img_input.shape
+                #img_input = img_input.reshape(w * h)
+
+                y = model.predict(img_input.reshape(1, -1))[0]
+                print(current_img_index, '=>', index, ':', y)
+                
+                if y < 0:
                     estimated_thresholds[index] = current_img_index
 
         write_progress((image_counter + 1) / number_of_images)
         image_counter += 1
-
-    print(estimated_thresholds)
 
     for index, zone in enumerate(zones_list):
 
         if estimated_thresholds[index] is None:
             # by default associate last image 
             estimated_thresholds[index] = dt.get_scene_image_quality(scenes_images[-1])
-        
+
+    print(estimated_thresholds)
+
     display_estimated_thresholds(scene, estimated_thresholds, human_thresholds)
 
 if __name__== "__main__":

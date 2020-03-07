@@ -4,6 +4,7 @@ import argparse
 import time
 import numpy as np
 import random
+import multiprocessing
 
 # image import
 from PIL import Image
@@ -11,8 +12,11 @@ import cv2
 
 # ml library
 from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVR
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
+import joblib
 
 # modules and config imports
 sys.path.insert(0, '') # trick to enable import of main folder module
@@ -34,12 +38,14 @@ def main():
     parser.add_argument('--data', type=str, help='noise mask dataset folder')
     parser.add_argument('--output', type=str, help='name of output model')
     parser.add_argument('--train_scenes', type=str, help='list of train scenes used', default='')
+    parser.add_argument('--norm', type=int, help='list of train scenes used', default=0)
 
     args = parser.parse_args()
 
     p_data         = args.data
     p_output       = args.output
     p_train_scenes = args.train_scenes.split(',')
+    p_norm         = bool(args.norm)
 
     # list all possibles choices of renderer
     scenes_list = cfg.scenes_names
@@ -117,8 +123,8 @@ def main():
 
                 label = 1
 
-                if current_img_index > thresholds[scene][index]:
-                    label = 0
+                if current_img_index < thresholds[scene][index]:
+                    label = -1
 
                 data = (label, np.array(block).reshape(200 * 200))
 
@@ -133,30 +139,41 @@ def main():
 
     random.shuffle(train_dict_data)
 
-    x_train_data = [ x for (y, x) in train_dict_data ]
-    y_train_data = [ y for (y, x) in train_dict_data ]
-    print(y_train_data)
+    if p_norm:
+        x_train_data = [ x / 255. for (y, x) in train_dict_data ]
+    else:
+        x_train_data = [ x / 255. for (y, x) in train_dict_data ]
 
-    x_test_data = [ x for (y, x) in test_dict_data ]
-    y_test_data = [ y for (y, x) in test_dict_data ]
+    y_train_data = [ y for (y, x) in train_dict_data ]
+
+    # x_test_data = [ x for (y, x) in test_dict_data ]
+    # y_test_data = [ y for (y, x) in test_dict_data ]
 
     print('--------------------------------------------')
     print('Start training model over', scenes_selected)
 
     # construct model
-    model = SVC(C=2, gamma=2, kernel='rbf', verbose=True)
+    #model = SVC(C=2, gamma=2, kernel='rbf', verbose=True)
 
+    parameters = {
+        "kernel": ["rbf"],
+        "C": [1, 2, 4, 8, 16, 32, 100,1000],
+        "gamma": [1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 10, 100]
+    }
+
+    print('Number of CPUs found', multiprocessing.cpu_count())
+    model = GridSearchCV(SVR(), parameters, cv=5, verbose=2, n_jobs=multiprocessing.cpu_count())
     model.fit(x_train_data, y_train_data)
+    
+    # y_train_predict = model.predict(x_train_data)
+    # y_test_predict = model.predict(x_test_data)
 
-    y_train_predict = model.predict(x_train_data)
-    y_test_predict = model.predict(x_test_data)
+    # train_val_accuracy = accuracy_score(y_train_data, y_train_predict)
+    # test_val_accuracy = accuracy_score(y_test_data, y_test_predict)
 
-    train_val_accuracy = accuracy_score(y_train_data, y_train_predict)
-    test_val_accuracy = accuracy_score(y_test_data, y_test_predict)
-
-    print('--------------------------------------------')
-    print('Train accuracy', train_val_accuracy, '%')
-    print('Test accuracy', test_val_accuracy, '%')
+    # print('--------------------------------------------')
+    # print('Train accuracy', train_val_accuracy, '%')
+    # print('Test accuracy', test_val_accuracy, '%')
 
     if not os.path.exists(saved_models_folder):
         os.makedirs(saved_models_folder)

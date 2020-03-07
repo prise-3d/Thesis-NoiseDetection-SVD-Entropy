@@ -155,12 +155,18 @@ def main():
 
                 y = model.predict(img_input.reshape(1, -1))[0]
                 
-                if y != 1:
+                if y < 0:
                     estimated_thresholds[index] = current_img_index
 
         write_progress((image_counter + 1) / number_of_images)
         image_counter += 1
 
+    for index, zone in enumerate(zones_list):
+
+        if estimated_thresholds[index] is None:
+            # by default associate last image 
+            estimated_thresholds[index] = dt.get_scene_image_quality(scenes_images[-1])
+            
     print(estimated_thresholds)
 
     display_estimated_thresholds(scene, estimated_thresholds, human_thresholds)
